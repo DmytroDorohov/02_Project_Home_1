@@ -59,12 +59,14 @@ void showInitWifi(int i)
     oled.display();
     break;
   case 3:
-    oled.println();
+    oled.println("\n");
     oled.println("Conected: ");
+    oled.println();
     oled.println(WiFi.localIP());
     oled.display();
     break;
   default:
+    oled.println("\n");
     oled.println("ERROR Conecting");
     oled.display();
     break;
@@ -81,38 +83,41 @@ void showInitSensors(int i)
     oled.setTextColor(WHITE);
     oled.setCursor(0, 0);
     oled.println("Sensor initialization");
+    oled.println();
     oled.display();
     break;
   case 10:
     oled.println("ERROR init ADS module");
+    oled.println();
     oled.display();
     break;
   case 11:
     oled.println("ADS module OK");
+    oled.println();
     oled.display();
     break;
   case 20:
     oled.println("ERROR init BME module");
+    oled.println();
     oled.display();
     break;
   case 21:
     oled.println("BME module OK");
+    oled.println();
     oled.display();
     break;
   case 30:
     oled.println("ERROR init MQ module");
+    oled.println();
     oled.display();
     break;
   case 31:
     oled.println("MQ module OK");
-    oled.display();
-    break;
-  case 55:
-    oled.println("All modules OK");
+    oled.println();
     oled.display();
     break;
   default:
-    oled.println("ERROR sensor ");
+    oled.println("ERROR sensor");
     oled.display();
     break;
   }
