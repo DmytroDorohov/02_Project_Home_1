@@ -38,6 +38,14 @@ void showInitWifi(int i)
 {
   switch (i)
   {
+  case 0:
+    oled.clearDisplay();
+    oled.setTextSize(1);
+    oled.setTextColor(WHITE);
+    oled.setCursor(0, 0);
+    oled.println("ERROR initialization WiFi");
+    oled.display();
+    break;
   case 1:
     oled.clearDisplay();
     oled.setTextSize(1);
@@ -67,8 +75,40 @@ void showInitSensors(int i)
 {
   switch (i)
   {
-  case 1:
+  case 0:
+    oled.clearDisplay();
+    oled.setTextSize(1);
+    oled.setTextColor(WHITE);
+    oled.setCursor(0, 0);
     oled.println("Sensor initialization");
+    oled.display();
+    break;
+  case 10:
+    oled.println("ERROR init ADS module");
+    oled.display();
+    break;
+  case 11:
+    oled.println("ADS module OK");
+    oled.display();
+    break;
+  case 20:
+    oled.println("ERROR init BME module");
+    oled.display();
+    break;
+  case 21:
+    oled.println("BME module OK");
+    oled.display();
+    break;
+  case 30:
+    oled.println("ERROR init MQ module");
+    oled.display();
+    break;
+  case 31:
+    oled.println("MQ module OK");
+    oled.display();
+    break;
+  case 55:
+    oled.println("All modules OK");
     oled.display();
     break;
   default:
