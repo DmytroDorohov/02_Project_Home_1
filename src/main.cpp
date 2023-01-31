@@ -4,13 +4,11 @@
 #include <Project_Test.h>
 #include <Project_Sensors.h>
 
-const String VERSION = "0.2";           // Version project
+const String VERSION = "0.3";           // Version project
 const char *WIFI_SSID = "TP-Link_D445"; // WiFi login
 const char *WIFI_PASS = "40581330";     // WiFi password
-const int ADDR_RTC = 0x10;              // TinyRTC DS1307 address on I2C
-const int ADDR_MEM = 0x10;              // TinyRTC AT24C address on I2C
 
-int16_t dataSensors[10];
+int16_t dataSensors[18];
 
 void setup()
 {
@@ -48,11 +46,14 @@ void setup()
 void loop()
 {
   scanWire(); // сканирование I2C линии
-  testingOLED();
   getData(dataSensors);
-  for (int i = 0; i < 10; i++)
+  showFirstPage(dataSensors);
+  delay(3000);
+  showSecondPage(dataSensors);
+  delay(3000);
+  for (int i = 0; i < 18; i++)
   {
     Serial.println(dataSensors[i]);
   }
-  delay(10000); // задержка
+  delay(3000); // задержка
 }

@@ -27,8 +27,8 @@ void logo(String ver)
   oled.setTextSize(1);
   oled.setCursor(20, 40);
   oled.println("Project Home 1");
-  oled.setCursor(30, 50);
-  oled.print("Version ");
+  oled.setCursor(40, 55);
+  oled.print("ver ");
   oled.print(ver);
   oled.display();
   delay(5000);
@@ -123,13 +123,84 @@ void showInitSensors(int i)
   }
 }
 
-void testingOLED(void)
+void showFirstPage(int16_t *mas)
 {
   oled.clearDisplay();
-  for (int16_t i = 0; i < oled.height() / 2; i += 2)
-  {
-    oled.drawRect(i, i, oled.width() - 2 * i, oled.height() - 2 * i, WHITE);
-    oled.display(); // Update screen with each newly-drawn rectangle
-    delay(1);
-  }
+  oled.setTextSize(1);
+  oled.setTextColor(WHITE);
+  oled.setCursor(0, 0);
+  //
+  oled.print(mas[0]);
+  oled.print(".");
+  oled.print(mas[1]);
+  oled.print(".");
+  oled.print(mas[2]);
+  oled.print("    ");
+  oled.print(mas[3]);
+  oled.print(":");
+  oled.print(mas[4]);
+  oled.println();
+  //
+  oled.setCursor(10, 12);
+  oled.print("Temp = ");
+  oled.print(mas[13]);
+  oled.print(" 'C");
+  oled.setCursor(10, 24);
+  oled.print("Pres = ");
+  oled.print(mas[14]);
+  oled.print(" mmHg");
+  oled.setCursor(10, 36);
+  oled.print("Humi = ");
+  oled.print(mas[15]);
+  oled.print(" %");
+  oled.setCursor(10, 48);
+  oled.print("Qual = ");
+  oled.print(mas[16]);
+  oled.print(" %");
+  oled.display();
+}
+
+void showSecondPage(int16_t *mas)
+{
+  oled.clearDisplay();
+  oled.setTextSize(1);
+  oled.setTextColor(WHITE);
+  oled.setCursor(0, 0);
+  //
+  oled.print(mas[0]);
+  oled.print(".");
+  oled.print(mas[1]);
+  oled.print(".");
+  oled.print(mas[2]);
+  oled.print("    ");
+  oled.print(mas[3]);
+  oled.print(":");
+  oled.print(mas[4]);
+  oled.println();
+  //
+  oled.setCursor(10, 12);
+  oled.print("A0 = ");
+  oled.print(mas[5]);
+  oled.print(".");
+  oled.print(mas[6]);
+  oled.print(" V");
+  oled.setCursor(10, 24);
+  oled.print("A1 = ");
+  oled.print(mas[7]);
+  oled.print(".");
+  oled.print(mas[8]);
+  oled.print(" V");
+  oled.setCursor(10, 36);
+  oled.print("A2 = ");
+  oled.print(mas[9]);
+  oled.print(".");
+  oled.print(mas[10]);
+  oled.print(" V");
+  oled.setCursor(10, 48);
+  oled.print("A3 = ");
+  oled.print(mas[11]);
+  oled.print(".");
+  oled.print(mas[12]);
+  oled.print(" V");
+  oled.display();
 }
