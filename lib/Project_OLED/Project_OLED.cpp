@@ -8,17 +8,27 @@
 #include <Adafruit_SSD1306.h>
 #include <Project_OLED.h>
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
-#define OLED_RESET -1    // Reset pin # (or -1 if sharing Arduino reset pin)
-#define ADDR_OLED 0x3C   // Oled address on I2C
+const int8_t SCREEN_WIDTH = 128; // OLED display width, in pixels
+const int8_t SCREEN_HEIGHT = 64; // OLED display height, in pixels
+const int8_t OLED_RESET = -1;    // Reset pin # (or -1 if sharing Arduino reset pin)
+const int8_t ADDR_OLED = 0x3C;   // Oled address on I2C
 
 Adafruit_SSD1306 oled = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-void logo(String ver)
+/**
+ * Constructor
+ */
+Oled::Oled(void)
 {
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   oled.begin(SSD1306_SWITCHCAPVCC, ADDR_OLED);
+}
+
+/**
+ * Function of show logo
+ */
+void Oled::logo(String ver)
+{
   oled.clearDisplay();
   oled.setTextSize(3);
   oled.setTextColor(WHITE);
@@ -34,7 +44,7 @@ void logo(String ver)
   delay(5000);
 }
 
-void showInitWifi(int i)
+void Oled::showInitWifi(int i)
 {
   switch (i)
   {
@@ -73,100 +83,66 @@ void showInitWifi(int i)
   }
 }
 
-void showInitSensors(int i)
-{
-  switch (i)
-  {
-  case 0:
-    oled.clearDisplay();
-    oled.setTextSize(1);
-    oled.setTextColor(WHITE);
-    oled.setCursor(0, 0);
-    oled.println("Sensor initialization");
-    oled.println();
-    oled.display();
-    break;
-  case 10:
-    oled.println("ERROR init ADS module");
-    oled.println();
-    oled.display();
-    break;
-  case 11:
-    oled.println("ADS module OK");
-    oled.println();
-    oled.display();
-    break;
-  case 20:
-    oled.println("ERROR init BME module");
-    oled.println();
-    oled.display();
-    break;
-  case 21:
-    oled.println("BME module OK");
-    oled.println();
-    oled.display();
-    break;
-  case 30:
-    oled.println("ERROR init MQ module");
-    oled.println();
-    oled.display();
-    break;
-  case 31:
-    oled.println("MQ module OK");
-    oled.println();
-    oled.display();
-    break;
-  default:
-    oled.println("ERROR sensor");
-    oled.display();
-    break;
-  }
-}
-
-void showFirstPage(int16_t *mas)
+/**
+ * Function of show initialization sensors
+ */
+void Oled::showInitSensors(void)
 {
   oled.clearDisplay();
   oled.setTextSize(1);
   oled.setTextColor(WHITE);
-  oled.setCursor(0, 0);
-  //
-  oled.print(mas[0]);
-  oled.print(".");
-  oled.print(mas[1]);
-  oled.print(".");
-  oled.print(mas[2]);
-  oled.print("    ");
-  oled.print(mas[3]);
-  oled.print(":");
-  oled.print(mas[4]);
-  oled.println();
-  //
-  oled.setCursor(10, 12);
-  oled.print("Temp = ");
-  oled.print(mas[13]);
-  oled.print(" 'C");
-  oled.setCursor(10, 24);
-  oled.print("Pres = ");
-  oled.print(mas[14]);
-  oled.print(" mmHg");
-  oled.setCursor(10, 36);
-  oled.print("Humi = ");
-  oled.print(mas[15]);
-  oled.print(" %");
-  oled.setCursor(10, 48);
-  oled.print("Qual = ");
-  oled.print(mas[16]);
-  oled.print(" %");
+  showPosText(0, 0, "Init sensors");
+  showPosText(20, 10, "ADS:");
+  showPosText(20, 20, "BME:");
+  showPosText(20, 30, "RTC:");
+  showPosText(20, 40, "FLASH:");
+  showPosText(20, 50, "MQ:");
+}
+
+void Oled::showInitSensors(int8_t y, boolean b)
+{
+  if (!b)
+    showPosText(60, y, "OK");
+  else
+    showPosText(60, y, "ERROR");
+}
+
+void Oled::showFirstPage(int16_t *mas)
+{
+  showHeaderPage(mas);
+  String str[] = {"Temp = ", "Pres = ", "Humi = ", "Qual = ", " C", " mmHg", " %", " %"};
+  for (int8_t i = 0; i < 4; i++)
+  {
+    oled.setCursor(10, 12 * (i + 1));
+    oled.print(str[i]);
+    oled.print(mas[13 + i]);
+    oled.print(str[4 + i]);
+  }
   oled.display();
 }
 
-void showSecondPage(int16_t *mas)
+void Oled::showSecondPage(int16_t *mas)
+{
+  showHeaderPage(mas);
+  String str[] = {"A0 = ", "A1 = ", "A2 = ", "A3 = ", ".", " V"};
+  for (int8_t i = 0; i < 4; i++)
+  {
+    oled.setCursor(10, 12 * (i + 1));
+    oled.print(str[i]);
+    oled.print(mas[5 + i]);
+    oled.print(str[4]);
+    oled.print(mas[6 + i]);
+    oled.print(str[5]);
+  }
+  oled.display();
+}
+
+void Oled::showHeaderPage(int16_t *mas)
 {
   oled.clearDisplay();
   oled.setTextSize(1);
   oled.setTextColor(WHITE);
   oled.setCursor(0, 0);
-  //
   oled.print(mas[0]);
   oled.print(".");
   oled.print(mas[1]);
@@ -177,30 +153,11 @@ void showSecondPage(int16_t *mas)
   oled.print(":");
   oled.print(mas[4]);
   oled.println();
-  //
-  oled.setCursor(10, 12);
-  oled.print("A0 = ");
-  oled.print(mas[5]);
-  oled.print(".");
-  oled.print(mas[6]);
-  oled.print(" V");
-  oled.setCursor(10, 24);
-  oled.print("A1 = ");
-  oled.print(mas[7]);
-  oled.print(".");
-  oled.print(mas[8]);
-  oled.print(" V");
-  oled.setCursor(10, 36);
-  oled.print("A2 = ");
-  oled.print(mas[9]);
-  oled.print(".");
-  oled.print(mas[10]);
-  oled.print(" V");
-  oled.setCursor(10, 48);
-  oled.print("A3 = ");
-  oled.print(mas[11]);
-  oled.print(".");
-  oled.print(mas[12]);
-  oled.print(" V");
+}
+
+void Oled::showPosText(int8_t x, int8_t y, String t)
+{
+  oled.setCursor(x, y);
+  oled.print(t);
   oled.display();
 }
