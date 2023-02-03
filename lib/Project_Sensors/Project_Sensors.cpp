@@ -58,6 +58,16 @@ void Sensors::initSensors(void)
     _disp.showInitSensors(30, true);
   else
     _disp.showInitSensors(30, false);
+  if (!rtc.isrunning())
+  {
+    Serial.println("RTC is NOT running, let's set the time!");
+    // When time needs to be set on a new device, or after a power loss, the
+    // following line sets the RTC to the date & time this sketch was compiled
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    // This line sets the RTC with an explicit date & time, for example to set
+    // January 21, 2014 at 3am you would call:
+    // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
+  }
 
   // Initialization AT module
   _disp.showInitSensors(40, false);
@@ -81,6 +91,14 @@ void Sensors::initSensors(void)
  */
 void Sensors::getData(int16_t *mas)
 {
+  // RTC DATA
+  DateTime time = rtc.now();
+  mas[0] = time.day();
+  mas[1] = time.month();
+  mas[2] = time.year();
+  mas[3] = time.hour();
+  mas[4] = time.minute();
+
   // ADS SENSOR
   int16_t _adc;
   for (int8_t i = 0; i < 4; i++)
@@ -96,6 +114,29 @@ void Sensors::getData(int16_t *mas)
   mas[13] = bme.readTemperature();
   mas[14] = bme.readPressure() / 100.0F;
   mas[15] = bme.readHumidity();
+
+  // MQ SENSOR
+  mas[16] = mas[11] + mas[12]; // расчет качества воздуха в %
+}
+
+/**
+ * Get RTC date
+ */
+String Sensors::getDate(void)
+{
+  char buf[] = "DD.MM.YYYY";
+  DateTime time = rtc.now();
+  return time.toString(buf);
+}
+
+/**
+ * Get RTC time
+ */
+String Sensors::getTime(void)
+{
+  char buf[] = "hh:mm";
+  DateTime time = rtc.now();
+  return time.toString(buf);
 }
 
 /**

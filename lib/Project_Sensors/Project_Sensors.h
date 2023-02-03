@@ -12,6 +12,8 @@ public:
   Sensors(int8_t, int8_t, int8_t, int8_t, int8_t, int8_t); // constructor
   void initSensors(void);                                  // initialization sensors
   void getData(int16_t *);                                 // get data in massiv from sensors
+  String getDate(void);                                    // get RTC date
+  String getTime(void);                                    // get RTC time
 private:
   // functions
   int16_t getFipVolts(int16_t); // getting the first integer part of the measured voltage

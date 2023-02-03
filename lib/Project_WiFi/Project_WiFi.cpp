@@ -23,23 +23,27 @@ WF::WF(String s, String p)
  */
 void WF::initWiFi(void)
 {
+  _dp.showInitWifi();
   if (!WiFi.begin(_ssid, _pass))
-    _dp.showInitWifi(0);
-  _dp.showInitWifi(1);
+    _dp.showInitWifi(10, 40, "ERROR init WiFi");
+  else
+  {
+    _dp.showInitWifi(10, 20, "Conecting WiFi");
+    return;
+  }
   for (int8_t i = 1; i <= 42; i++)
   {
-    _dp.showInitWifi(2);
+    _dp.showInitWifi(i);
     delay(500);
     if (WiFi.status() == WL_CONNECTED)
     {
-      _dp.showInitWifi(3);
+      _dp.showInitWifi(10, 52, WiFi.localIP().toString());
       break;
     }
     else if (i == 42)
     {
-      _dp.showInitWifi(40);
+      _dp.showInitWifi(10, 52, "ERROR conect");
       break;
     }
   }
-  delay(2000);
 }

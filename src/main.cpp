@@ -4,7 +4,7 @@
 #include <Project_Sensors.h>
 #include <Project_WiFi.h>
 
-const String VERSION = "0.4";            // Version project
+const String VERSION = "0.5";            // Version project
 const String WIFI_SSID = "TP-Link_D445"; // WiFi login
 const String WIFI_PASS = "40581330";     // WiFi password
 const int8_t ADDR_ADS = 0x48;            // ADS1115 address on I2C
@@ -15,7 +15,7 @@ const int8_t PIN_MQ_IN = D7;             // MQ135 input pin
 const int8_t PIN_MQ_OUT = D8;            // MQ135 output pin
 
 int16_t dataSensors[18];
-static Oled Disp;                                                           // class from Project_OLED
+Oled Disp;                                                                  // class from Project_OLED
 Sensors Sens(ADDR_ADS, ADDR_BME, ADDR_RTC, ADDR_AT, PIN_MQ_IN, PIN_MQ_OUT); // class from Project_Sensors
 WF Wf(WIFI_SSID, WIFI_PASS);                                                // class from Project_WiFi
 
@@ -28,6 +28,7 @@ void setup()
 
   // Conecting to WiFi
   Wf.initWiFi();
+  delay(2000);
 
   // Initialization sesors
   Sens.initSensors();
@@ -38,10 +39,11 @@ void loop()
 {
   // scanWire(); // scan I2C
   Sens.getData(dataSensors);
-  Disp.showFirstPage(dataSensors);
-  delay(3000);
-  Disp.showSecondPage(dataSensors);
-  delay(3000);
+  Disp.showFirstPage(dataSensors, Sens.getDate(), Sens.getTime());
+  delay(5000);
+  Disp.showSecondPage(dataSensors, Sens.getDate(), Sens.getTime());
+  delay(5000);
+  // третья страница со статусом датчиков
   for (int8_t i = 0; i < 18; i++)
   {
     Serial.println(dataSensors[i]);

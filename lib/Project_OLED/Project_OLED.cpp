@@ -3,7 +3,6 @@
 */
 
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Project_OLED.h>
@@ -18,17 +17,15 @@ Adafruit_SSD1306 oled = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLE
 /**
  * Constructor
  */
-Oled::Oled(void)
-{
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  oled.begin(SSD1306_SWITCHCAPVCC, ADDR_OLED);
-}
+Oled::Oled(void) {}
 
 /**
  * Function of show logo
  */
 void Oled::logo(String ver)
 {
+  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+  oled.begin(SSD1306_SWITCHCAPVCC, ADDR_OLED);
   oled.clearDisplay();
   oled.setTextSize(3);
   oled.setTextColor(WHITE);
@@ -44,43 +41,26 @@ void Oled::logo(String ver)
   delay(5000);
 }
 
-void Oled::showInitWifi(int i)
+/**
+ * Function of show initialization WiFi
+ */
+void Oled::showInitWifi(void)
 {
-  switch (i)
-  {
-  case 0:
-    oled.clearDisplay();
-    oled.setTextSize(1);
-    oled.setTextColor(WHITE);
-    oled.setCursor(0, 0);
-    oled.println("ERROR initialization WiFi");
-    oled.display();
-    break;
-  case 1:
-    oled.clearDisplay();
-    oled.setTextSize(1);
-    oled.setTextColor(WHITE);
-    oled.setCursor(0, 0);
-    oled.println("Conecting WiFi");
-    oled.display();
-    break;
-  case 2:
-    oled.print(".");
-    oled.display();
-    break;
-  case 3:
-    oled.println("\n");
-    oled.println("Conected: ");
-    oled.println();
-    oled.println(WiFi.localIP());
-    oled.display();
-    break;
-  default:
-    oled.println("\n");
-    oled.println("ERROR Conecting");
-    oled.display();
-    break;
-  }
+  oled.clearDisplay();
+  oled.setTextSize(1);
+  oled.setTextColor(WHITE);
+  showPosText(0, 0, "Initialization WiFi");
+}
+
+void Oled::showInitWifi(int8_t a)
+{
+  oled.fillRect(1, 40, 3 * a, 5, SSD1306_WHITE);
+  oled.display();
+}
+
+void Oled::showInitWifi(int8_t x, int8_t y, String s)
+{
+  showPosText(x, y, s);
 }
 
 /**
@@ -107,9 +87,14 @@ void Oled::showInitSensors(int8_t y, boolean b)
     showPosText(60, y, "ERROR");
 }
 
-void Oled::showFirstPage(int16_t *mas)
+/**
+ * Function of show first information page
+ */
+void Oled::showFirstPage(int16_t *mas, String date, String time)
 {
-  showHeaderPage(mas);
+  _date = date;
+  _time = time;
+  showHeaderPage();
   String str[] = {"Temp = ", "Pres = ", "Humi = ", "Qual = ", " C", " mmHg", " %", " %"};
   for (int8_t i = 0; i < 4; i++)
   {
@@ -121,9 +106,14 @@ void Oled::showFirstPage(int16_t *mas)
   oled.display();
 }
 
-void Oled::showSecondPage(int16_t *mas)
+/**
+ * Function of show second information page
+ */
+void Oled::showSecondPage(int16_t *mas, String date, String time)
 {
-  showHeaderPage(mas);
+  _date = date;
+  _time = time;
+  showHeaderPage();
   String str[] = {"A0 = ", "A1 = ", "A2 = ", "A3 = ", ".", " V"};
   for (int8_t i = 0; i < 4; i++)
   {
@@ -137,24 +127,24 @@ void Oled::showSecondPage(int16_t *mas)
   oled.display();
 }
 
-void Oled::showHeaderPage(int16_t *mas)
+/**
+ * Function of show header information in pages
+ */
+void Oled::showHeaderPage(void)
 {
   oled.clearDisplay();
   oled.setTextSize(1);
   oled.setTextColor(WHITE);
   oled.setCursor(0, 0);
-  oled.print(mas[0]);
-  oled.print(".");
-  oled.print(mas[1]);
-  oled.print(".");
-  oled.print(mas[2]);
-  oled.print("    ");
-  oled.print(mas[3]);
-  oled.print(":");
-  oled.print(mas[4]);
-  oled.println();
+  oled.print(_date);
+  oled.setCursor(80, 0);
+  oled.print(_time);
+  oled.display();
 }
 
+/**
+ * Function of show text in position
+ */
 void Oled::showPosText(int8_t x, int8_t y, String t)
 {
   oled.setCursor(x, y);
