@@ -7,42 +7,37 @@
 #include <Project_OLED.h>
 #include <Project_WiFi.h>
 
-Oled _dp;
-
 /**
  * Constructor
  */
-WF::WF(String s, String p)
-{
-  _ssid = s;
-  _pass = p;
-}
+WF::WF(void) {}
 
 /**
  * Initialization of WiFi conection
  */
-void WF::initWiFi(void)
+void WF::initWiFi(const char *_ssid, const char *_pass, Oled *_disp)
 {
-  _dp.showInitWifi();
+  _disp->showInitWifi();
   if (!WiFi.begin(_ssid, _pass))
-    _dp.showInitWifi(10, 40, "ERROR init WiFi");
-  else
   {
-    _dp.showInitWifi(10, 20, "Conecting WiFi");
+    _disp->showInitWifi(10, 40, "ERROR init WiFi");
     return;
   }
+  else
+    _disp->showInitWifi(10, 20, "Conecting WiFi");
   for (int8_t i = 1; i <= 42; i++)
   {
-    _dp.showInitWifi(i);
+    _disp->showInitWifi(i);
     delay(500);
     if (WiFi.status() == WL_CONNECTED)
     {
-      _dp.showInitWifi(10, 52, WiFi.localIP().toString());
+      _disp->showInitWifi(42);
+      _disp->showInitWifi(10, 52, WiFi.localIP().toString());
       break;
     }
     else if (i == 42)
     {
-      _dp.showInitWifi(10, 52, "ERROR conect");
+      _disp->showInitWifi(10, 52, "ERROR conect");
       break;
     }
   }

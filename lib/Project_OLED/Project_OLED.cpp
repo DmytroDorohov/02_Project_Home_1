@@ -7,12 +7,7 @@
 #include <Adafruit_SSD1306.h>
 #include <Project_OLED.h>
 
-const int8_t SCREEN_WIDTH = 128; // OLED display width, in pixels
-const int8_t SCREEN_HEIGHT = 64; // OLED display height, in pixels
-const int8_t OLED_RESET = -1;    // Reset pin # (or -1 if sharing Arduino reset pin)
-const int8_t ADDR_OLED = 0x3C;   // Oled address on I2C
-
-Adafruit_SSD1306 oled = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+static Adafruit_SSD1306 oled;
 
 /**
  * Constructor
@@ -22,10 +17,11 @@ Oled::Oled(void) {}
 /**
  * Function of show logo
  */
-void Oled::logo(String ver)
+void Oled::logo(int8_t _addr, int8_t _sw, int8_t _sh, int8_t _or, const char *ver)
 {
+  oled = Adafruit_SSD1306(_sw, _sh, &Wire, _or);
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  oled.begin(SSD1306_SWITCHCAPVCC, ADDR_OLED);
+  oled.begin(SSD1306_SWITCHCAPVCC, _addr);
   oled.clearDisplay();
   oled.setTextSize(3);
   oled.setTextColor(WHITE);
@@ -38,7 +34,6 @@ void Oled::logo(String ver)
   oled.print("ver ");
   oled.print(ver);
   oled.display();
-  delay(5000);
 }
 
 /**
@@ -72,11 +67,11 @@ void Oled::showInitSensors(void)
   oled.setTextSize(1);
   oled.setTextColor(WHITE);
   showPosText(0, 0, "Init sensors");
-  showPosText(20, 10, "ADS:");
-  showPosText(20, 20, "BME:");
-  showPosText(20, 30, "RTC:");
-  showPosText(20, 40, "FLASH:");
-  showPosText(20, 50, "MQ:");
+  showPosText(20, 12, "ADS:");
+  showPosText(20, 22, "BME:");
+  showPosText(20, 32, "RTC:");
+  showPosText(20, 42, "FLASH:");
+  showPosText(20, 52, "MQ:");
 }
 
 void Oled::showInitSensors(int8_t y, boolean b)
@@ -119,9 +114,9 @@ void Oled::showSecondPage(int16_t *mas, String date, String time)
   {
     oled.setCursor(10, 12 * (i + 1));
     oled.print(str[i]);
-    oled.print(mas[5 + i]);
+    oled.print(mas[5 + i * 2]);
     oled.print(str[4]);
-    oled.print(mas[6 + i]);
+    oled.print(mas[6 + i * 2]);
     oled.print(str[5]);
   }
   oled.display();

@@ -6,47 +6,38 @@
 #include <Adafruit_ADS1X15.h>
 #include <Adafruit_BME280.h>
 #include <RTClib.h>
-#include <Project_Sensors.h>
 #include <Project_OLED.h>
+#include <Project_Sensors.h>
 
-Adafruit_ADS1115 ads;
-Adafruit_BME280 bme;
-RTC_DS1307 rtc;
-Oled _disp;
+static Adafruit_ADS1115 ads;
+static Adafruit_BME280 bme;
+static RTC_DS1307 rtc;
 
 /**
  * Constructor
  */
-Sensors::Sensors(int8_t ads, int8_t bme, int8_t ds, int8_t at, int8_t pmi, int8_t pmo)
-{
-  _addr_ads = ads;
-  _addr_bme = bme;
-  _addr_ds = ds;
-  _addr_at = at;
-  _pin_mq_in = pmi;
-  _pin_mq_out = pmo;
-}
+Sensors::Sensors(void) {}
 
 /**
  * Sensor initialization.
  * sensors: ADS1115, BME280, MQ135, DS1307, AT24
  */
-void Sensors::initSensors(void)
+void Sensors::initSensors(int8_t _addr_ads, int8_t _addr_bme, int8_t _addr_ds, int8_t _addr_at, int8_t _pin_mq_in, int8_t _pin_mq_out, Oled *_disp)
 {
-  _disp.showInitSensors();
+  _disp->showInitSensors();
 
   // Initialization ADS module
   ads.setGain(GAIN_TWOTHIRDS); // 2/3x gain +/- 6.144V 1bit = 3mV 0.1875mV (default)
   if (!ads.begin(_addr_ads, &Wire))
-    _disp.showInitSensors(10, true);
+    _disp->showInitSensors(12, true);
   else
-    _disp.showInitSensors(10, false);
+    _disp->showInitSensors(12, false);
 
   // Initialization BME module
   if (!bme.begin(_addr_bme, &Wire))
-    _disp.showInitSensors(20, true);
+    _disp->showInitSensors(22, true);
   else
-    _disp.showInitSensors(20, false);
+    _disp->showInitSensors(22, false);
   bme.setSampling(Adafruit_BME280::MODE_FORCED,
                   Adafruit_BME280::SAMPLING_X1, // temperature
                   Adafruit_BME280::SAMPLING_X1, // pressure
@@ -55,9 +46,9 @@ void Sensors::initSensors(void)
 
   // Initialization RTC module
   if (!rtc.begin())
-    _disp.showInitSensors(30, true);
+    _disp->showInitSensors(32, true);
   else
-    _disp.showInitSensors(30, false);
+    _disp->showInitSensors(32, false);
   if (!rtc.isrunning())
   {
     Serial.println("RTC is NOT running, let's set the time!");
@@ -70,16 +61,18 @@ void Sensors::initSensors(void)
   }
 
   // Initialization AT module
-  _disp.showInitSensors(40, false);
+  _disp->showInitSensors(42, false);
 
   // Initialization MQ module
   pinMode(_pin_mq_out, OUTPUT);
   pinMode(_pin_mq_in, INPUT);
   digitalWrite(_pin_mq_out, HIGH);
+  delay(10);
   if (!digitalRead(_pin_mq_in))
-    _disp.showInitSensors(50, true);
+    _disp->showInitSensors(52, true);
   else
-    _disp.showInitSensors(50, false);
+    _disp->showInitSensors(52, false);
+  digitalWrite(_pin_mq_out, LOW); // ????
 }
 
 /**
