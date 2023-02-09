@@ -12,8 +12,6 @@ public:
   WF(void);                                          // constructor
   void initWiFi(const char *, const char *, Oled *); // function of initialization WiFi conection
 private:
-  // functions
-  // data
 };
 
 #endif

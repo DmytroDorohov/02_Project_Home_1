@@ -5,8 +5,6 @@
 #ifndef Project_OLED_h
 #define Project_OLED_h
 #include <Arduino.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 
 class Oled
 {
@@ -21,10 +19,8 @@ public:
   void showFirstPage(int16_t *, String, String);           // function of show first information page
   void showSecondPage(int16_t *, String, String);          // function of show second information page
 private:
-  // functions
   void showHeaderPage();                    // function of show header information in pages
   void showPosText(int8_t, int8_t, String); // function of show text in position
-  // data
   String _date, _time;
 };
 

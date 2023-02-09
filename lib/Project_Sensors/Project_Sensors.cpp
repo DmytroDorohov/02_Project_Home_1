@@ -22,8 +22,15 @@ Sensors::Sensors(void) {}
  * Sensor initialization.
  * sensors: ADS1115, BME280, MQ135, DS1307, AT24
  */
-void Sensors::initSensors(int8_t _addr_ads, int8_t _addr_bme, int8_t _addr_ds, int8_t _addr_at, int8_t _pin_mq_in, int8_t _pin_mq_out, Oled *_disp)
+void Sensors::initSensors(int8_t adr_ads, int8_t adr_bme, int8_t adr_ds, int8_t adr_at, int8_t pmi, int8_t pmo, Oled *_disp)
 {
+  _addr_ads = adr_ads;
+  _addr_bme = adr_bme;
+  _addr_ds = adr_ds;
+  _addr_at = adr_at;
+  _pin_mq_in = pmi;
+  _pin_mq_out = pmo;
+
   _disp->showInitSensors();
 
   // Initialization ADS module
@@ -61,7 +68,7 @@ void Sensors::initSensors(int8_t _addr_ads, int8_t _addr_bme, int8_t _addr_ds, i
   }
 
   // Initialization AT module
-  _disp->showInitSensors(42, false);
+  _disp->showInitSensors(42, true);
 
   // Initialization MQ module
   pinMode(_pin_mq_out, OUTPUT);
@@ -151,4 +158,47 @@ int16_t Sensors::getSipVolts(int16_t volt)
   _volt = ads.computeVolts(volt); // voltage calculation
   _volt -= (int16_t)_volt;
   return (int16_t)(_volt * 100);
+}
+
+/**
+ * Write byte in AT24
+ */
+void Sensors::writeByteAT(uint16_t address, byte data)
+{
+  Wire.beginTransmission(_addr_at);
+  if (Wire.endTransmission() == 0)
+  {
+    Wire.beginTransmission(_addr_at);
+    Wire.write(address >> 8);
+    Wire.write(address & 0xFF);
+    Wire.write(data);
+    Wire.endTransmission();
+    delay(20); // ?????
+  }
+}
+
+/**
+ * Read byte from AT24
+ */
+byte Sensors::readByteAT(uint16_t address)
+{
+  byte b = 0;
+  int r = 0;
+  Wire.beginTransmission(_addr_at);
+  if (Wire.endTransmission() == 0)
+  {
+    Wire.beginTransmission(_addr_at);
+    Wire.write(address >> 8);
+    Wire.write(address & 0xFF);
+    if (Wire.endTransmission() == 0)
+    {
+      Wire.requestFrom(_addr_at, 1);
+      while (Wire.available() > 0 && r < 1)
+      {
+        b = (byte)Wire.read();
+        r++;
+      }
+    }
+  }
+  return b;
 }

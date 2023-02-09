@@ -1,10 +1,11 @@
 #include <Arduino.h>
+#include <Wire.h>
 #include <Project_OLED.h>
 #include <Project_Sensors.h>
 #include <Project_WiFi.h>
 // #include <Project_Test.h>
 
-const char *VERSION = "0.6";            // Version project
+const char *VERSION = "0.7";            // Version project
 const char *WIFI_SSID = "TP-Link_D445"; // WiFi login
 const char *WIFI_PASS = "40581330";     // WiFi password
 const int8_t ADDR_ADS = 0x48;           // ADS1115 address on I2C
