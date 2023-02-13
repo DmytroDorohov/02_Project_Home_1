@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <TimeLib.h>
 #include <Project_OLED.h>
 #include <Project_WiFi.h>
 
@@ -41,4 +42,13 @@ void WF::initWiFi(const char *_ssid, const char *_pass, Oled *_disp)
       break;
     }
   }
+}
+
+/**
+ * function of synchronizing time fnd date with server
+ *
+ */
+void WF::synchroTimeDate(void)
+{
+  setTime(14, 10, 45, 13, 2, 2023);
 }

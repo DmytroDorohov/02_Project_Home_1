@@ -6,27 +6,24 @@
 #define Project_Sensors_h
 #include <Arduino.h>
 
-#define AT_PAGE 32       // page size AT24C32
-#define AT_TEST_BYTE 0   // test byte in AT24C32 memory address
-#define AT_HB_QUANTITY 1 // high byte of the number of records in AT24C32 memory address
-#define AT_LB_QUANTITY 2 // low byte of the number of records in AT24C32 memory address
-#define AT_BEGIN_ADDR 8  // the address of the beginning of records in AT24C32 memory
+#define ADDR_ADS 0x48 // ADS1115 address on I2C
+#define ADDR_BME 0x76 // BME280 address on I2C (0x77h or 0x76h)
+#define PIN_MQ_IN D6  // MQ135 input pin
+#define PIN_MQ_OUT D5 // MQ135 output pin
+
+const float MultFactor[] = {1, 8.19, 8.268, 1}; // multiplication factor voltage on A0-A3 input
 
 class Sensors
 {
 public:
-  Sensors(void);                                                            // constructor
-  void initSensors(int8_t, int8_t, int8_t, int8_t, int8_t, int8_t, Oled *); // initialization sensors
-  void getData(int16_t *);                                                  // get data in massiv from sensors
-  String getDate(void);                                                     // get RTC date
-  String getTime(void);                                                     // get RTC time
+  Sensors(void);            // constructor
+  void initSensors(Oled *); // initialization sensors
+  void getData(int16_t *);  // get data in massiv from sensors
+  String getDate(void);     // get date
+  String getTime(void);     // get time
 private:
-  int16_t getFipVolts(int16_t);     // getting the first integer part of the measured voltage
-  int16_t getSipVolts(int16_t);     // getting the second integer part of the measured voltage
-  void writeByteAT(uint16_t, byte); // write byte in AT24
-  byte readByteAT(uint16_t);        // read byte from AT24
-  int8_t _addr_ads, _addr_bme, _addr_ds, _addr_at;
-  int8_t _pin_mq_in, _pin_mq_out;
+  int16_t getFipVolts(int16_t); // getting the first integer part of the measured voltage
+  int16_t getSipVolts(int16_t); // getting the second integer part of the measured voltage
 };
 
 #endif

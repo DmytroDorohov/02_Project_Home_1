@@ -5,13 +5,12 @@
 #include <Arduino.h>
 #include <Adafruit_ADS1X15.h>
 #include <Adafruit_BME280.h>
-#include <RTClib.h>
+#include <TimeLib.h>
 #include <Project_OLED.h>
 #include <Project_Sensors.h>
 
 static Adafruit_ADS1115 ads;
 static Adafruit_BME280 bme;
-static RTC_DS1307 rtc;
 
 /**
  * Constructor
@@ -20,28 +19,21 @@ Sensors::Sensors(void) {}
 
 /**
  * Sensor initialization.
- * sensors: ADS1115, BME280, MQ135, DS1307, AT24
+ * sensors: ADS1115, BME280, MQ135,
  */
-void Sensors::initSensors(int8_t adr_ads, int8_t adr_bme, int8_t adr_ds, int8_t adr_at, int8_t pmi, int8_t pmo, Oled *_disp)
+void Sensors::initSensors(Oled *_disp)
 {
-  _addr_ads = adr_ads;
-  _addr_bme = adr_bme;
-  _addr_ds = adr_ds;
-  _addr_at = adr_at;
-  _pin_mq_in = pmi;
-  _pin_mq_out = pmo;
-
   _disp->showInitSensors();
 
   // Initialization ADS module
   ads.setGain(GAIN_TWOTHIRDS); // 2/3x gain +/- 6.144V 1bit = 3mV 0.1875mV (default)
-  if (!ads.begin(_addr_ads, &Wire))
+  if (!ads.begin(ADDR_ADS, &Wire))
     _disp->showInitSensors(12, true);
   else
     _disp->showInitSensors(12, false);
 
   // Initialization BME module
-  if (!bme.begin(_addr_bme, &Wire))
+  if (!bme.begin(ADDR_BME, &Wire))
     _disp->showInitSensors(22, true);
   else
     _disp->showInitSensors(22, false);
@@ -51,35 +43,17 @@ void Sensors::initSensors(int8_t adr_ads, int8_t adr_bme, int8_t adr_ds, int8_t 
                   Adafruit_BME280::SAMPLING_X1, // humidity
                   Adafruit_BME280::FILTER_OFF);
 
-  // Initialization RTC module
-  if (!rtc.begin())
-    _disp->showInitSensors(32, true);
-  else
-    _disp->showInitSensors(32, false);
-  if (!rtc.isrunning())
-  {
-    Serial.println("RTC is NOT running, let's set the time!");
-    // When time needs to be set on a new device, or after a power loss, the
-    // following line sets the RTC to the date & time this sketch was compiled
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    // This line sets the RTC with an explicit date & time, for example to set
-    // January 21, 2014 at 3am you would call:
-    // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
-  }
-
-  // Initialization AT module
-  _disp->showInitSensors(42, true);
-
   // Initialization MQ module
-  pinMode(_pin_mq_out, OUTPUT);
-  pinMode(_pin_mq_in, INPUT);
-  digitalWrite(_pin_mq_out, HIGH);
+  pinMode(PIN_MQ_OUT, OUTPUT);
+  digitalWrite(PIN_MQ_OUT, HIGH);
   delay(10);
-  if (!digitalRead(_pin_mq_in))
+  pinMode(PIN_MQ_IN, INPUT);
+  if (!digitalRead(PIN_MQ_IN))
     _disp->showInitSensors(52, true);
   else
     _disp->showInitSensors(52, false);
-  digitalWrite(_pin_mq_out, LOW); // ????
+  delay(2000);
+  digitalWrite(PIN_MQ_OUT, LOW); // ????
 }
 
 /**
@@ -91,19 +65,18 @@ void Sensors::initSensors(int8_t adr_ads, int8_t adr_bme, int8_t adr_ds, int8_t 
  */
 void Sensors::getData(int16_t *mas)
 {
-  // RTC DATA
-  DateTime time = rtc.now();
-  mas[0] = time.day();
-  mas[1] = time.month();
-  mas[2] = time.year();
-  mas[3] = time.hour();
-  mas[4] = time.minute();
+  // Time & Date DATA
+  mas[0] = day();
+  mas[1] = month();
+  mas[2] = year();
+  mas[3] = hour();
+  mas[4] = minute();
 
   // ADS SENSOR
   int16_t _adc;
   for (int8_t i = 0; i < 4; i++)
   {
-    _adc = ads.readADC_SingleEnded(i);
+    _adc = ads.readADC_SingleEnded(i) * MultFactor[i];
     mas[(i * 2 + 5)] = getFipVolts(_adc);
     mas[(i * 2 + 6)] = getSipVolts(_adc);
   }
@@ -120,24 +93,14 @@ void Sensors::getData(int16_t *mas)
 }
 
 /**
- * Get RTC date
+ * Get date
  */
-String Sensors::getDate(void)
-{
-  char buf[] = "DD.MM.YYYY";
-  DateTime time = rtc.now();
-  return time.toString(buf);
-}
+String Sensors::getDate(void) { return (String)day() + '.' + (String)month() + '.' + (String)year(); }
 
 /**
- * Get RTC time
+ * Get time
  */
-String Sensors::getTime(void)
-{
-  char buf[] = "hh:mm";
-  DateTime time = rtc.now();
-  return time.toString(buf);
-}
+String Sensors::getTime(void) { return (String)hour() + ':' + (String)minute(); }
 
 /**
  * Getting the first integer part of the measured voltage
@@ -158,47 +121,4 @@ int16_t Sensors::getSipVolts(int16_t volt)
   _volt = ads.computeVolts(volt); // voltage calculation
   _volt -= (int16_t)_volt;
   return (int16_t)(_volt * 100);
-}
-
-/**
- * Write byte in AT24
- */
-void Sensors::writeByteAT(uint16_t address, byte data)
-{
-  Wire.beginTransmission(_addr_at);
-  if (Wire.endTransmission() == 0)
-  {
-    Wire.beginTransmission(_addr_at);
-    Wire.write(address >> 8);
-    Wire.write(address & 0xFF);
-    Wire.write(data);
-    Wire.endTransmission();
-    delay(20); // ?????
-  }
-}
-
-/**
- * Read byte from AT24
- */
-byte Sensors::readByteAT(uint16_t address)
-{
-  byte b = 0;
-  int r = 0;
-  Wire.beginTransmission(_addr_at);
-  if (Wire.endTransmission() == 0)
-  {
-    Wire.beginTransmission(_addr_at);
-    Wire.write(address >> 8);
-    Wire.write(address & 0xFF);
-    if (Wire.endTransmission() == 0)
-    {
-      Wire.requestFrom(_addr_at, 1);
-      while (Wire.available() > 0 && r < 1)
-      {
-        b = (byte)Wire.read();
-        r++;
-      }
-    }
-  }
-  return b;
 }

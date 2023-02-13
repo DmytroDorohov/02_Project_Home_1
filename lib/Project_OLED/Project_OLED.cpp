@@ -17,11 +17,11 @@ Oled::Oled(void) {}
 /**
  * Function of show logo
  */
-void Oled::logo(int8_t _addr, int8_t _sw, int8_t _sh, int8_t _or, const char *ver)
+void Oled::logo(const char *ver)
 {
-  oled = Adafruit_SSD1306(_sw, _sh, &Wire, _or);
+  oled = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  oled.begin(SSD1306_SWITCHCAPVCC, _addr);
+  oled.begin(SSD1306_SWITCHCAPVCC, ADDR_OLED);
   oled.clearDisplay();
   oled.setTextSize(3);
   oled.setTextColor(WHITE);
