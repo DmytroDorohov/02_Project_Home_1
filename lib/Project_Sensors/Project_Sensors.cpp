@@ -44,16 +44,17 @@ void Sensors::initSensors(Oled *_disp)
                   Adafruit_BME280::FILTER_OFF);
 
   // Initialization MQ module
-  pinMode(PIN_MQ_OUT, OUTPUT);
-  digitalWrite(PIN_MQ_OUT, HIGH);
-  delay(10);
-  pinMode(PIN_MQ_IN, INPUT);
-  if (!digitalRead(PIN_MQ_IN))
-    _disp->showInitSensors(52, true);
+  pinMode(PIN_MQ_PW, OUTPUT);
+  digitalWrite(PIN_MQ_PW, HIGH);
+  int16_t _ads = ads.readADC_SingleEnded(3);
+  Serial.println(_ads);
+  delay(1000); // заменить временным циклом
+  Serial.println(ads.readADC_SingleEnded(3));
+  if (_ads + 100 < ads.readADC_SingleEnded(3))
+    _disp->showInitSensors(32, false);
   else
-    _disp->showInitSensors(52, false);
-  delay(2000);
-  digitalWrite(PIN_MQ_OUT, LOW); // ????
+    _disp->showInitSensors(32, true);
+  digitalWrite(PIN_MQ_PW, LOW);
 }
 
 /**
@@ -73,12 +74,15 @@ void Sensors::getData(int16_t *mas)
   mas[4] = minute();
 
   // ADS SENSOR
-  int16_t _adc;
+  int16_t _ads;
+  float _mq_v;
   for (int8_t i = 0; i < 4; i++)
   {
-    _adc = ads.readADC_SingleEnded(i) * MultFactor[i];
-    mas[(i * 2 + 5)] = getFipVolts(_adc);
-    mas[(i * 2 + 6)] = getSipVolts(_adc);
+    _ads = ads.readADC_SingleEnded(i) * MultFactor[i];
+    mas[(i * 2 + 5)] = getFipVolts(_ads);
+    mas[(i * 2 + 6)] = getSipVolts(_ads);
+    if (i == 3)
+      _mq_v = ads.computeVolts(_ads);
   }
 
   // BME SENSOR
@@ -89,18 +93,13 @@ void Sensors::getData(int16_t *mas)
   mas[15] = bme.readHumidity();
 
   // MQ SENSOR
-  mas[16] = mas[11] + mas[12]; // расчет качества воздуха в %
+  if (_mq_v < MQ_V_null)
+    mas[16] = 0;
+  else if (_mq_v > MQ_V_max)
+    mas[16] = 100;
+  else
+    mas[16] = (int16_t)(_mq_v * (MQ_V_max - MQ_V_null) / 100.0);
 }
-
-/**
- * Get date
- */
-String Sensors::getDate(void) { return (String)day() + '.' + (String)month() + '.' + (String)year(); }
-
-/**
- * Get time
- */
-String Sensors::getTime(void) { return (String)hour() + ':' + (String)minute(); }
 
 /**
  * Getting the first integer part of the measured voltage

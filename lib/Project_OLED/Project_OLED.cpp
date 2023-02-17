@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <TimeLib.h>
 #include <Project_OLED.h>
 
 static Adafruit_SSD1306 oled;
@@ -69,9 +70,7 @@ void Oled::showInitSensors(void)
   showPosText(0, 0, "Init sensors");
   showPosText(20, 12, "ADS:");
   showPosText(20, 22, "BME:");
-  showPosText(20, 32, "RTC:");
-  showPosText(20, 42, "FLASH:");
-  showPosText(20, 52, "MQ:");
+  showPosText(20, 32, "MQ:");
 }
 
 void Oled::showInitSensors(int8_t y, boolean b)
@@ -85,10 +84,8 @@ void Oled::showInitSensors(int8_t y, boolean b)
 /**
  * Function of show first information page
  */
-void Oled::showFirstPage(int16_t *mas, String date, String time)
+void Oled::showFirstPage(int16_t *mas)
 {
-  _date = date;
-  _time = time;
   showHeaderPage();
   String str[] = {"Temp = ", "Pres = ", "Humi = ", "Qual = ", " C", " mmHg", " %", " %"};
   for (int8_t i = 0; i < 4; i++)
@@ -104,10 +101,8 @@ void Oled::showFirstPage(int16_t *mas, String date, String time)
 /**
  * Function of show second information page
  */
-void Oled::showSecondPage(int16_t *mas, String date, String time)
+void Oled::showSecondPage(int16_t *mas)
 {
-  _date = date;
-  _time = time;
   showHeaderPage();
   String str[] = {"A0 = ", "A1 = ", "A2 = ", "A3 = ", ".", " V"};
   for (int8_t i = 0; i < 4; i++)
@@ -131,9 +126,9 @@ void Oled::showHeaderPage(void)
   oled.setTextSize(1);
   oled.setTextColor(WHITE);
   oled.setCursor(0, 0);
-  oled.print(_date);
+  oled.print((String)day() + '.' + (String)month() + '.' + (String)year());
   oled.setCursor(80, 0);
-  oled.print(_time);
+  oled.print((String)hour() + ':' + (String)minute());
   oled.display();
 }
 
